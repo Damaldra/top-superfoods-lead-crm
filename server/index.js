@@ -3,6 +3,7 @@
 import express from 'express';
 import cors from 'cors';
 import { leadsRouter } from './leads.js';
+import { authRouter, requireAuth, currentUser } from './auth.js';
 
 const app = express();
 app.use(cors());            // дозволяємо запити з фронтенду (інший origin у dev)
@@ -24,8 +25,16 @@ app.get('/', (_req, res) => {
   });
 });
 
-// Бізнес-маршрути
+// Авторизація панелі менеджера (login/logout) — публічний роутер.
+app.use('/api/auth', authRouter);
+
+// Бізнес-маршрути.
+// УВАГА: публічним лишається лише POST /api/leads (прийом заявки з лендінгу) —
+// захист manager-ендпоінтів зроблено всередині leadsRouter (див. leads.js).
 app.use('/api/leads', leadsRouter);
+
+// Профіль поточного користувача (захищено).
+app.get('/api/me', requireAuth, (_req, res) => res.json({ ok: true, user: currentUser() }));
 
 // --- Mock CRM ---------------------------------------------------------------
 // Імітує зовнішній сервіс. Навмисно "падає" приблизно у 40% випадків,
