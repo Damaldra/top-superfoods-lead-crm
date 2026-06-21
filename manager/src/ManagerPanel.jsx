@@ -1,20 +1,35 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { fetchLeads, fetchDeadLetters, retryDeadLetter } from './api.js';
 
-export default function ManagerPanel() {
+// Вкладка «Заявки»: таблиця з пошуком, фільтром за статусом, сортуванням,
+// експортом CSV + блок dead-letter з ретраєм.
+export default function ManagerPanel({ onAuthError }) {
   const [leads, setLeads] = useState([]);
   const [dead, setDead] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [retrying, setRetrying] = useState(null); // id заявки, яку зараз повторюємо
+
+  // Керування таблицею
+  const [query, setQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all'); // all | sent | queued
+  const [sort, setSort] = useState('date-desc'); // date-desc | date-asc | id-asc | id-desc
 
   // Тягнемо обидва списки паралельно
   const load = useCallback(async () => {
     setLoading(true);
-    const [l, d] = await Promise.all([fetchLeads(), fetchDeadLetters()]);
-    setLeads(l);
-    setDead(d);
-    setLoading(false);
-  }, []);
+    setError('');
+    try {
+      const [l, d] = await Promise.all([fetchLeads(), fetchDeadLetters()]);
+      setLeads(l);
+      setDead(d);
+    } catch (err) {
+      if (err.name === 'AuthError') onAuthError?.();
+      else setError('Не вдалося завантажити дані');
+    } finally {
+      setLoading(false);
+    }
+  }, [onAuthError]);
 
   useEffect(() => {
     load();
@@ -22,9 +37,76 @@ export default function ManagerPanel() {
 
   async function handleRetry(id) {
     setRetrying(id);
-    await retryDeadLetter(id);
-    await load(); // перечитуємо стан після спроби
-    setRetrying(null);
+    try {
+      await retryDeadLetter(id);
+      await load(); // перечитуємо стан після спроби
+    } catch (err) {
+      if (err.name === 'AuthError') onAuthError?.();
+      else setError('Не вдалося завантажити дані');
+    } finally {
+      setRetrying(null);
+    }
+  }
+
+  // Пошук + фільтр + сортування на клієнті
+  const visibleLeads = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    let rows = leads.filter((l) => {
+      if (statusFilter !== 'all' && l.status !== statusFilter) return false;
+      if (!q) return true;
+      return (
+        (l.name || '').toLowerCase().includes(q) ||
+        (l.email || '').toLowerCase().includes(q) ||
+        (l.phone || '').toLowerCase().includes(q)
+      );
+    });
+
+    rows = [...rows].sort((a, b) => {
+      switch (sort) {
+        case 'date-asc':
+          return new Date(a.createdAt) - new Date(b.createdAt);
+        case 'id-asc':
+          return a.id - b.id;
+        case 'id-desc':
+          return b.id - a.id;
+        case 'date-desc':
+        default:
+          return new Date(b.createdAt) - new Date(a.createdAt);
+      }
+    });
+    return rows;
+  }, [leads, query, statusFilter, sort]);
+
+  // Експорт поточного відфільтрованого списку у CSV (на клієнті)
+  function exportCsv() {
+    const headers = ['ID', "Імʼя", 'Email', 'Телефон', 'Продукт', 'Коментар', 'Статус', 'CRM ID', 'Створено'];
+    const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const lines = [
+      headers.join(','),
+      ...visibleLeads.map((l) =>
+        [l.id, l.name, l.email, l.phone, l.product, l.comment, l.status, l.crmId || '', l.createdAt]
+          .map(esc)
+          .join(',')
+      ),
+    ];
+    // BOM, щоб Excel коректно показав кирилицю
+    const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `leads-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // Помилка сервера — окреме повідомлення, щоб не плутати «порожньо» і «помилка».
+  if (error) {
+    return (
+      <div className="card">
+        <p className="form-error">{error}</p>
+        <button className="ghost" onClick={load}>↻ Спробувати ще раз</button>
+      </div>
+    );
   }
 
   if (loading) {
@@ -40,15 +122,45 @@ export default function ManagerPanel() {
       <section className="card">
         <div className="card-head">
           <h2>
-            Заявки <span className="badge">{leads.length}</span>
+            Заявки <span className="badge">{visibleLeads.length}</span>
           </h2>
-          <button className="ghost" onClick={load}>
-            ↻ Оновити
-          </button>
+          <div className="toolbar-actions">
+            <button className="ghost" onClick={exportCsv} disabled={visibleLeads.length === 0}>
+              ⤓ Експорт CSV
+            </button>
+            <button className="ghost" onClick={load}>
+              ↻ Оновити
+            </button>
+          </div>
         </div>
 
-        {leads.length === 0 ? (
-          <p className="muted">Поки що порожньо. Залиште заявку на лендінгу (порт 5173).</p>
+        <div className="toolbar">
+          <input
+            className="search"
+            type="search"
+            placeholder="Пошук: імʼя, email, телефон…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          <select
+            aria-label="Фільтр за статусом"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="all">Всі статуси</option>
+            <option value="sent">У CRM</option>
+            <option value="queued">У черзі</option>
+          </select>
+          <select aria-label="Сортування" value={sort} onChange={(e) => setSort(e.target.value)}>
+            <option value="date-desc">Дата ↓ (нові)</option>
+            <option value="date-asc">Дата ↑ (старі)</option>
+            <option value="id-asc">ID ↑</option>
+            <option value="id-desc">ID ↓</option>
+          </select>
+        </div>
+
+        {visibleLeads.length === 0 ? (
+          <p className="muted">Нічого не знайдено за вибраними умовами.</p>
         ) : (
           <table className="table">
             <thead>
@@ -61,7 +173,7 @@ export default function ManagerPanel() {
               </tr>
             </thead>
             <tbody>
-              {leads.map((l) => (
+              {visibleLeads.map((l) => (
                 <tr key={l.id}>
                   <td>{l.id}</td>
                   <td>{l.name}</td>
@@ -73,7 +185,7 @@ export default function ManagerPanel() {
                   <td>{l.product}</td>
                   <td>
                     {l.status === 'sent' ? (
-                      <span className="pill ok">CRM ✓ {l.crmId}</span>
+                      <span className="pill ok">CRM ✓ {l.crmId || '—'}</span>
                     ) : (
                       <span className="pill warn">у черзі</span>
                     )}
