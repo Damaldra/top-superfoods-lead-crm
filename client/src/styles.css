@@ -1,0 +1,188 @@
+:root {
+  --green: #3a7d44;
+  --green-dark: #2c5e34;
+  --bg: #f4f7f2;
+  --border: #d8e0d4;
+  --error: #c0392b;
+  --text: #21281f;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.page {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 32px 16px 48px;
+}
+
+.hero { text-align: center; margin-bottom: 24px; }
+.hero h1 { font-size: 2rem; margin: 0 0 8px; color: var(--green-dark); }
+.hero p { margin: 0; color: #55604f; }
+
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 6px 20px rgba(44, 94, 52, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.card h2 { margin: 0 0 4px; font-size: 1.25rem; }
+
+.field { display: flex; flex-direction: column; gap: 6px; font-size: 0.9rem; }
+.field > span { font-weight: 600; }
+
+.field input,
+.field select,
+.field textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus { border-color: var(--green); }
+
+.field.has-error input,
+.field.has-error select { border-color: var(--error); }
+
+.field-error { color: var(--error); font-size: 0.8rem; font-style: normal; }
+
+.error-banner {
+  background: #fdecea;
+  color: var(--error);
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+button {
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+button:hover:not(:disabled) { background: var(--green-dark); }
+button:disabled { opacity: 0.6; cursor: default; }
+
+.success { text-align: center; }
+.success h2 { color: var(--green-dark); }
+
+.foot {
+  margin-top: 28px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #889483;
+}
+
+/* --- Вкладки --- */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+  justify-content: center;
+}
+.tab {
+  background: #fff;
+  color: var(--green-dark);
+  border: 1px solid var(--border);
+  padding: 8px 16px;
+  font-size: 0.9rem;
+}
+.tab:hover:not(:disabled) { background: #eef3ec; }
+.tab.active {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+
+/* --- Панель менеджера --- */
+.manager { display: flex; flex-direction: column; gap: 16px; }
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.badge {
+  display: inline-block;
+  min-width: 22px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--green);
+  color: #fff;
+  font-size: 0.8rem;
+  text-align: center;
+}
+.badge.warn { background: #e08a1e; }
+
+.muted { color: #889483; font-size: 0.88rem; }
+
+.ghost {
+  background: transparent;
+  color: var(--green-dark);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+.ghost:hover:not(:disabled) { background: #eef3ec; }
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+.table th,
+.table td {
+  text-align: left;
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.table th { color: #55604f; font-weight: 600; }
+
+.pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+.pill.ok { background: #e6f3e8; color: var(--green-dark); }
+.pill.warn { background: #fcefd9; color: #9a6212; }
+
+.dl-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.dl-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: #fcefd9;
+  border-radius: 10px;
+  font-size: 0.88rem;
+}
+.dl-list button { padding: 8px 12px; font-size: 0.85rem; white-space: nowrap; }
