@@ -1,0 +1,226 @@
+:root {
+  --green: #3a7d44;
+  --green-dark: #2c5e34;
+  --bg: #f4f7f2;
+  --border: #d8e0d4;
+  --error: #c0392b;
+  --text: #21281f;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 32px 16px 48px;
+}
+
+.hero { text-align: center; margin-bottom: 24px; }
+.hero h1 { font-size: 2rem; margin: 0 0 8px; color: var(--green-dark); }
+.hero p { margin: 0; color: #55604f; }
+
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 6px 20px rgba(44, 94, 52, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.card h2 { margin: 0 0 4px; font-size: 1.25rem; }
+
+button {
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+button:hover:not(:disabled) { background: var(--green-dark); }
+button:disabled { opacity: 0.6; cursor: default; }
+
+.foot {
+  margin-top: 28px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #889483;
+}
+
+/* --- Панель менеджера --- */
+.manager { display: flex; flex-direction: column; gap: 16px; }
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.badge {
+  display: inline-block;
+  min-width: 22px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--green);
+  color: #fff;
+  font-size: 0.8rem;
+  text-align: center;
+}
+.badge.warn { background: #e08a1e; }
+
+.muted { color: #889483; font-size: 0.88rem; }
+
+.ghost {
+  background: transparent;
+  color: var(--green-dark);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+.ghost:hover:not(:disabled) { background: #eef3ec; }
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+.table th,
+.table td {
+  text-align: left;
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.table th { color: #55604f; font-weight: 600; }
+
+.pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+.pill.ok { background: #e6f3e8; color: var(--green-dark); }
+.pill.warn { background: #fcefd9; color: #9a6212; }
+
+.dl-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.dl-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: #fcefd9;
+  border-radius: 10px;
+  font-size: 0.88rem;
+}
+.dl-list button { padding: 8px 12px; font-size: 0.85rem; white-space: nowrap; }
+
+/* --- Навігація (вкладки) --- */
+.tabs {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.tabs-left { display: flex; gap: 8px; flex-wrap: wrap; }
+.tab {
+  background: #fff;
+  color: var(--green-dark);
+  border: 1px solid var(--border);
+  padding: 8px 16px;
+  font-size: 0.9rem;
+}
+.tab:hover:not(:disabled) { background: #eef3ec; }
+.tab.active { background: var(--green); color: #fff; border-color: var(--green); }
+.tab.active:hover { background: var(--green-dark); }
+.tab.logout { color: var(--error); border-color: #eccac5; }
+.tab.logout:hover:not(:disabled) { background: #faecea; }
+
+/* --- KPI-картки --- */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+.kpi-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 16px;
+  box-shadow: 0 6px 20px rgba(44, 94, 52, 0.06);
+  text-align: center;
+}
+.kpi-value { font-size: 1.8rem; font-weight: 700; color: var(--green-dark); }
+.kpi-label { margin-top: 4px; font-size: 0.82rem; color: #55604f; }
+
+/* --- Бар-чарт по продуктах (CSS) --- */
+.bar-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.bar-row { display: grid; grid-template-columns: 140px 1fr 36px; align-items: center; gap: 10px; font-size: 0.88rem; }
+.bar-label { color: var(--text); }
+.bar-track { background: #eef3ec; border-radius: 999px; height: 14px; overflow: hidden; }
+.bar-fill { display: block; height: 100%; background: var(--green); border-radius: 999px; min-width: 4px; }
+.bar-count { text-align: right; color: #55604f; font-weight: 600; }
+
+/* --- Тулбар таблиці (пошук / фільтр / сортування) --- */
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
+.toolbar-actions { display: flex; gap: 8px; }
+.toolbar .search { flex: 1 1 200px; }
+.toolbar input,
+.toolbar select,
+.login-card input {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  background: #fff;
+  color: var(--text);
+}
+.toolbar input:focus,
+.toolbar select:focus,
+.login-card input:focus { outline: 2px solid var(--green); outline-offset: 0; }
+
+/* --- Екран входу --- */
+.login-wrap { display: flex; justify-content: center; }
+.login-card { max-width: 360px; width: 100%; }
+.field { display: flex; flex-direction: column; gap: 4px; font-size: 0.88rem; color: #55604f; }
+.login-hint { text-align: center; margin: 4px 0 0; }
+.form-error { color: var(--error); font-size: 0.88rem; margin: 0; }
+
+button.danger { background: var(--error); }
+button.danger:hover:not(:disabled) { background: #a5281a; }
+
+/* --- Профіль --- */
+.profile-head { display: flex; align-items: center; gap: 16px; }
+.profile-head h2 { margin: 0; }
+.avatar {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--green);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; font-weight: 700;
+  flex-shrink: 0;
+}
+.profile-info { display: flex; flex-direction: column; gap: 10px; margin: 4px 0; }
+.profile-info div { display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+.profile-info dt { margin: 0; color: #55604f; font-size: 0.88rem; }
+.profile-info dd { margin: 0; font-weight: 600; }
+.profile-card button.danger { align-self: flex-start; }
